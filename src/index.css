@@ -40,75 +40,108 @@
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
+}
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  padding: 0;
 }
 
 #root {
   width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: left;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
-  padding: 0 40px;
-}
-
-h1, h2 {
-  font-family: var(--heading);
-  font-weight: 600;
-  color: var(--text-h);
 }
 
 h1 {
-  font-size: 28px;
-  letter-spacing: -0.5px;
-  margin: 24px 0 20px;
+  font-family: var(--heading);
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 26px;
+  margin: 0 0 20px;
 }
 
 h2 {
+  font-family: var(--heading);
+  font-weight: 600;
+  color: var(--text-h);
   font-size: 20px;
-  line-height: 118%;
   margin: 0 0 8px;
 }
 
 p { margin: 0; }
 
-code, .counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* ===== NAVBAR ===== */
+.navbar {
+  width: 100%;
+  background: #0f0f0f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 40px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
-code {
+.navbar-brand {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-btn {
+  background: transparent;
+  color: #ccc;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 6px 16px;
   font-size: 14px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-/* ===== Wrapper scroll tabla ===== */
+.nav-btn:hover {
+  background: #2a2a2a;
+  color: #fff;
+  opacity: 1;
+}
+
+.nav-btn-active {
+  background: #2a2a2a;
+  color: #fff;
+  border-color: #666;
+}
+
+/* ===== CONTENIDO ===== */
+.page-content {
+  flex: 1;
+  padding: 28px 48px;
+  width: 100%;
+}
+
+/* ===== Wrapper tabla ===== */
 .table-wrapper {
   width: 100%;
-  overflow-x: auto;
   overflow-y: auto;
-  max-height: calc(7 * 51px + 48px);
+  max-height: calc(7 * 54px + 50px);
   border: 1px solid var(--border);
   border-radius: 8px;
 }
 
 .table-wrapper::-webkit-scrollbar {
   width: 7px;
-  height: 7px;
 }
 .table-wrapper::-webkit-scrollbar-track {
   background: var(--code-bg);
@@ -124,6 +157,7 @@ code {
   width: 100%;
   border-collapse: collapse;
   font-size: 15px;
+  table-layout: fixed;
 }
 
 .page-table thead tr {
@@ -131,23 +165,26 @@ code {
 }
 
 .page-table th {
-  padding: 11px 18px;
+  padding: 13px 20px;
   text-align: left;
   font-weight: 600;
   color: var(--text-h);
   border-bottom: 2px solid var(--accent-border);
-  white-space: nowrap;
   position: sticky;
   top: 0;
   background-color: var(--bg);
   z-index: 1;
+  font-size: 15px;
 }
 
 .page-table td {
-  padding: 10px 18px;
+  padding: 13px 20px;
   border-bottom: 1px solid var(--border);
   color: var(--text);
   vertical-align: middle;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -162,12 +199,12 @@ code {
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .page-controls input,
 .page-controls select {
-  padding: 7px 11px;
+  padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 14px;
@@ -186,7 +223,7 @@ code {
 .bottom-bar {
   display: flex;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 18px;
   flex-wrap: wrap;
 }
 
@@ -194,7 +231,7 @@ code {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -205,9 +242,9 @@ code {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 28px 32px;
+  padding: 30px 34px;
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -223,7 +260,7 @@ code {
 
 .modal-card input,
 .modal-card select {
-  padding: 9px 11px;
+  padding: 9px 12px;
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 14px;
@@ -232,7 +269,6 @@ code {
   outline: none;
   transition: border-color 0.2s;
   width: 100%;
-  box-sizing: border-box;
 }
 
 .modal-card input:focus,
@@ -248,7 +284,7 @@ code {
 
 /* ===== Botón base ===== */
 button {
-  padding: 7px 14px;
+  padding: 8px 16px;
   border: none;
   border-radius: 6px;
   cursor: pointer;

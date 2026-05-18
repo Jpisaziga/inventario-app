@@ -6,38 +6,28 @@ function App() {
   const [page, setPage] = useState('inventory')
 
   return (
-    <div style={{ maxWidth: '600px', margin: 'auto', fontFamily: 'Arial' }}>
-      
-      {/* 🔝 NAVBAR */}
-      <nav
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          padding: '10px',
-          background: '#000',
-          color: '#fff',
-          borderRadius: '10px',
-          marginTop: '10px'
-        }}
-      >
-        <span>📦 App Inventario</span>
-
-        <div>
+    <div>
+      {/* NAVBAR */}
+      <nav className="navbar">
+        <span className="navbar-brand">📦 App Inventario</span>
+        <div className="navbar-links">
           <button
+            className={`nav-btn ${page === 'inventory' ? 'nav-btn-active' : ''}`}
             onClick={() => setPage('inventory')}
-            style={{ marginRight: '10px' }}
           >
             Inventario
           </button>
-
-          <button onClick={() => setPage('movements')}>
+          <button
+            className={`nav-btn ${page === 'movements' ? 'nav-btn-active' : ''}`}
+            onClick={() => setPage('movements')}
+          >
             Movimientos
           </button>
         </div>
       </nav>
 
-      {/* 📄 CONTENIDO */}
-      <div style={{ marginTop: '20px' }}>
+      {/* CONTENIDO */}
+      <div className="page-content">
         {page === 'inventory' && <Inventory />}
         {page === 'movements' && <Movements />}
       </div>
