@@ -1,4 +1,4 @@
-/* ===== Botones top-bar inventario ===== */
+/* ===== Botones inventario ===== */
 .btn-edit-mode {
   padding: 7px 14px;
   background-color: #f0a500;
@@ -22,6 +22,18 @@
   transition: background 0.2s;
 }
 .btn-add:hover { background-color: #388e3c; }
+
+.btn-move {
+  padding: 7px 14px;
+  background-color: #3a86ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.btn-move:hover { background-color: #2563eb; }
 
 /* ===== Botones acción en tabla ===== */
 .btn-pencil, .btn-trash, .btn-save {

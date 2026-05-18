@@ -19,12 +19,10 @@ export default function Movements() {
 
   useEffect(() => {
     let result = [...movements]
-
     result = result.filter(m =>
       m.product_name.toLowerCase().includes(search.toLowerCase()) ||
       m.product_code.toLowerCase().includes(search.toLowerCase())
     )
-
     if (selectedDate) {
       result = result.filter(m => {
         const d = new Date(m.created_at)
@@ -36,13 +34,11 @@ export default function Movements() {
         return localDate === selectedDate
       })
     }
-
     result.sort((a, b) =>
       order === 'desc'
         ? new Date(b.created_at) - new Date(a.created_at)
         : new Date(a.created_at) - new Date(b.created_at)
     )
-
     setFiltered(result)
   }, [search, movements, order, selectedDate])
 
