@@ -15,7 +15,7 @@
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font: 16px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
@@ -24,10 +24,6 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -55,48 +51,39 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 1280px;
   margin: 0 auto;
-  text-align: center;
+  text-align: left;
   border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  padding: 0 32px;
 }
 
-h1,
-h2 {
+h1, h2 {
   font-family: var(--heading);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-h);
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.5px;
+  margin: 24px 0 20px;
 }
 
-code,
-.counter {
+h2 {
+  font-size: 20px;
+  line-height: 118%;
+  margin: 0 0 8px;
+}
+
+p { margin: 0; }
+
+code, .counter {
   font-family: var(--mono);
   display: inline-flex;
   border-radius: 4px;
@@ -104,8 +91,167 @@ code,
 }
 
 code {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+/* ===== Wrapper scroll tabla ===== */
+.table-wrapper {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  overflow-y: auto;
+  max-height: calc(7 * 51px + 48px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar {
+  width: 7px;
+}
+.table-wrapper::-webkit-scrollbar-track {
+  background: var(--code-bg);
+  border-radius: 8px;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--accent-border);
+  border-radius: 8px;
+}
+
+/* ===== Tabla global ===== */
+.page-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.page-table thead tr {
+  background-color: var(--accent-bg);
+}
+
+.page-table th {
+  padding: 11px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-h);
+  border-bottom: 2px solid var(--accent-border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background-color: var(--bg);
+  z-index: 1;
+}
+
+.page-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.page-table tbody tr:hover {
+  background-color: var(--accent-bg);
+  transition: background 0.15s;
+}
+
+/* ===== Controles / filtros ===== */
+.page-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.page-controls input,
+.page-controls select {
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text-h);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.page-controls input:focus,
+.page-controls select:focus {
+  border-color: var(--accent);
+}
+
+/* ===== Top bar ===== */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.top-bar-right {
+  display: flex;
+  gap: 10px;
+}
+
+/* ===== Formularios emergentes ===== */
+.form-card {
+  margin-top: 24px;
+  padding: 22px 26px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--code-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 460px;
+}
+
+.form-card h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.form-card input,
+.form-card select {
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text-h);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-card input:focus,
+.form-card select:focus {
+  border-color: var(--accent);
+}
+
+.form-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ===== Botón base ===== */
+button {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s, opacity 0.2s;
+  background-color: var(--border);
+  color: var(--text-h);
+}
+
+button:hover {
+  opacity: 0.82;
 }
