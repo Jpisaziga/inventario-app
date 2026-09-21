@@ -1,111 +1,241 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../services/supabaseClient'
+import { useToast } from '../hooks/useToast'
+import { StatCard, SearchField, Th, EmptyState, TableSkeleton } from '../components/Ui'
+import {
+  IconExchange,
+  IconSearch,
+  IconX,
+  IconActivity,
+  IconArrowDownCircle,
+  IconArrowUpCircle,
+} from '../components/Icons'
+import {
+  formatCurrency,
+  formatCurrencyCompact,
+  formatDateTime,
+  formatNumber,
+  toLocalDate,
+  toDayKey,
+} from '../lib/format'
+import { compareBy } from '../lib/sort'
 
 export default function Movements() {
+  const toast = useToast()
+
   const [movements, setMovements] = useState([])
-  const [filtered, setFiltered] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const [search, setSearch] = useState('')
-  const [order, setOrder] = useState('desc')
-  const [selectedDate, setSelectedDate] = useState('')
-
-  const load = async () => {
-    const { data } = await supabase.from('movements').select('*')
-    setMovements(data || [])
-    setFiltered(data || [])
-  }
-
-  useEffect(() => { load() }, [])
+  const [date, setDate] = useState('')
+  const [type, setType] = useState('all') // all | income | expense
+  const [sort, setSort] = useState({ field: 'created_at', order: 'desc' })
 
   useEffect(() => {
-    let result = [...movements]
-    result = result.filter(m =>
-      m.product_name.toLowerCase().includes(search.toLowerCase()) ||
-      m.product_code.toLowerCase().includes(search.toLowerCase())
-    )
-    if (selectedDate) {
-      result = result.filter(m => {
-        const d = new Date(m.created_at)
-        d.setHours(d.getHours() - 5)
-        const localDate =
-          d.getFullYear() + '-' +
-          String(d.getMonth() + 1).padStart(2, '0') + '-' +
-          String(d.getDate()).padStart(2, '0')
-        return localDate === selectedDate
-      })
+    const load = async () => {
+      const { data, error } = await supabase.from('movements').select('*')
+      if (error) toast.error('No se pudo cargar el historial')
+      setMovements(data ?? [])
+      setLoading(false)
     }
-    result.sort((a, b) =>
-      order === 'desc'
-        ? new Date(b.created_at) - new Date(a.created_at)
-        : new Date(a.created_at) - new Date(b.created_at)
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return movements
+      .filter((m) => {
+        if (q && !m.product_name?.toLowerCase().includes(q) && !m.product_code?.toLowerCase().includes(q)) {
+          return false
+        }
+        if (type !== 'all' && m.type !== type) return false
+        if (date && toDayKey(toLocalDate(m.created_at)) !== date) return false
+        return true
+      })
+      .sort(compareBy(sort.field, sort.order))
+  }, [movements, search, date, type, sort])
+
+  // Las métricas siguen los filtros activos: el encabezado describe lo que se ve.
+  const stats = useMemo(() => {
+    let inUnits = 0
+    let outUnits = 0
+    let inValue = 0
+    let outValue = 0
+
+    for (const m of filtered) {
+      if (m.type === 'income') {
+        inUnits += m.quantity || 0
+        inValue += m.total || 0
+      } else {
+        outUnits += m.quantity || 0
+        outValue += m.total || 0
+      }
+    }
+    return { inUnits, outUnits, inValue, outValue }
+  }, [filtered])
+
+  const toggleSort = (field) =>
+    setSort((s) =>
+      s.field === field ? { field, order: s.order === 'asc' ? 'desc' : 'asc' } : { field, order: 'desc' },
     )
-    setFiltered(result)
-  }, [search, movements, order, selectedDate])
+
+  const hasFilters = Boolean(search || date || type !== 'all')
+
+  const clearFilters = () => {
+    setSearch('')
+    setDate('')
+    setType('all')
+  }
 
   return (
-    <div>
-      <h1>Movimientos</h1>
+    <div className="page-inner">
+      <header className="page-head">
+        <div>
+          <span className="page-eyebrow">Historial</span>
+          <h1>Movimientos</h1>
+          <p className="page-sub">
+            Todas las entradas y salidas registradas, con su valor y fecha.
+          </p>
+        </div>
+      </header>
 
-      <div className="page-controls">
-        <input
-          placeholder="Buscar producto o código"
+      <section className="stats">
+        <StatCard
+          icon={IconActivity}
+          label="Movimientos"
+          value={formatNumber(filtered.length)}
+          hint={hasFilters ? 'según los filtros activos' : 'registrados en total'}
+        />
+        <StatCard
+          icon={IconArrowDownCircle}
+          label="Ingresos"
+          value={formatNumber(stats.inUnits)}
+          hint={`${formatCurrencyCompact(stats.inValue)} · unidades recibidas`}
+          accent="var(--success)"
+        />
+        <StatCard
+          icon={IconArrowUpCircle}
+          label="Salidas"
+          value={formatNumber(stats.outUnits)}
+          hint={`${formatCurrencyCompact(stats.outValue)} · unidades despachadas`}
+          accent="var(--danger)"
+        />
+        <StatCard
+          icon={IconExchange}
+          label="Balance de unidades"
+          value={formatNumber(stats.inUnits - stats.outUnits)}
+          hint="ingresos menos salidas"
+          accent="var(--blue-500)"
+        />
+      </section>
+
+      <div className="toolbar">
+        <SearchField
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={setSearch}
+          placeholder="Buscar por producto o código"
+          label="Buscar movimientos"
         />
+
+        <select
+          className="select"
+          style={{ width: 'auto' }}
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          aria-label="Filtrar por tipo"
+        >
+          <option value="all">Todos los tipos</option>
+          <option value="income">Sólo ingresos</option>
+          <option value="expense">Sólo salidas</option>
+        </select>
+
         <input
+          className="input"
+          style={{ width: 'auto' }}
           type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          aria-label="Filtrar por fecha"
         />
-        <button onClick={() => setOrder(order === 'desc' ? 'asc' : 'desc')}>
-          {order === 'desc' ? 'Más recientes ↓' : 'Más antiguos ↑'}
-        </button>
-        {selectedDate && (
-          <button onClick={() => setSelectedDate('')}>✖ Limpiar fecha</button>
+
+        {hasFilters && (
+          <span className="filter-chip">
+            Filtros activos
+            <button className="btn-icon" onClick={clearFilters} aria-label="Limpiar filtros">
+              <IconX size={13} />
+            </button>
+          </span>
         )}
       </div>
 
-      <div className="table-wrapper">
-        <table className="page-table">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Código</th>
-              <th>Producto</th>
-              <th>Tipo</th>
-              <th>Cantidad</th>
-              <th>Precio</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(m => {
-              const d = new Date(m.created_at)
-              d.setHours(d.getHours() - 5)
-              return (
-                <tr key={m.id}>
-                  <td>
-                    {d.toLocaleString('es-CO', {
-                      day: '2-digit', month: '2-digit', year: 'numeric',
-                      hour: 'numeric', minute: '2-digit', hour12: true
-                    })}
-                  </td>
-                  <td>{m.product_code}</td>
-                  <td>{m.product_name}</td>
-                  <td>
-                    <span className={`badge ${m.type === 'income' ? 'badge-income' : 'badge-expense'}`}>
-                      {m.type === 'income' ? 'Ingreso' : 'Salida'}
-                    </span>
-                  </td>
-                  <td>{m.quantity}</td>
-                  <td>${m.unit_price}</td>
-                  <td>${m.total}</td>
+      <section className="card">
+        <div className="card-head">
+          <div className="card-title">
+            <h2>Historial</h2>
+            <span className="card-count">
+              {filtered.length === movements.length
+                ? `${formatNumber(movements.length)} en total`
+                : `${formatNumber(filtered.length)} de ${formatNumber(movements.length)}`}
+            </span>
+          </div>
+        </div>
+
+        {loading ? (
+          <TableSkeleton rows={6} cols={5} />
+        ) : filtered.length === 0 ? (
+          movements.length === 0 ? (
+            <EmptyState
+              icon={IconExchange}
+              title="Aún no hay movimientos"
+              text="Registra una entrada o salida desde el inventario y aparecerá aquí."
+            />
+          ) : (
+            <EmptyState
+              icon={IconSearch}
+              title="Sin resultados"
+              text="Ningún movimiento coincide con los filtros aplicados."
+            />
+          )
+        ) : (
+          <div className="table-scroll">
+            <table className="table">
+              <thead>
+                <tr>
+                  <Th field="created_at" label="Fecha" sort={sort} onSort={toggleSort} />
+                  <Th field="product_code" label="Código" sort={sort} onSort={toggleSort} />
+                  <Th field="product_name" label="Producto" sort={sort} onSort={toggleSort} />
+                  <Th field="type" label="Tipo" sort={sort} onSort={toggleSort} />
+                  <Th field="quantity" label="Cantidad" sort={sort} onSort={toggleSort} numeric />
+                  <Th field="unit_price" label="Precio unidad" sort={sort} onSort={toggleSort} numeric />
+                  <Th field="total" label="Total" sort={sort} onSort={toggleSort} numeric />
                 </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {filtered.map((m) => {
+                  const isIncome = m.type === 'income'
+                  return (
+                    <tr key={m.id}>
+                      <td className="td-date">{formatDateTime(m.created_at)}</td>
+                      <td className="td-code">{m.product_code}</td>
+                      <td className="td-strong">{m.product_name}</td>
+                      <td>
+                        <span className={`badge ${isIncome ? 'badge-in' : 'badge-out'}`}>
+                          <span className="badge-dot" />
+                          {isIncome ? 'Ingreso' : 'Salida'}
+                        </span>
+                      </td>
+                      <td className="td-num">{formatNumber(m.quantity)}</td>
+                      <td className="td-num">{formatCurrency(m.unit_price)}</td>
+                      <td className="td-num td-strong">{formatCurrency(m.total)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   )
 }

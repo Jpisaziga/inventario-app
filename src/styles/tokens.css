@@ -1,0 +1,166 @@
+/* ============================================================
+   Design tokens — paleta navy + blanco hueso
+   Claro: fondo hueso, superficies blancas, tinta azul-noche.
+   Oscuro: fondo azul-negro, superficies navy, texto humo.
+   ============================================================ */
+
+:root {
+  /* --- Escala de marca --------------------------------- */
+  --bone-50:  #fbfaf7;
+  --bone-100: #f5f2ec;
+  --bone-200: #ece7dd;
+  --bone-300: #e0d9cb;
+
+  --navy-950: #061224;
+  --navy-900: #0a1b31;
+  --navy-800: #102843;
+  --navy-700: #1a3a5c;
+  --navy-600: #24507c;
+
+  --blue-700: #1b4f9c;
+  --blue-600: #2266c4;
+  --blue-500: #3b82e0;
+  --blue-400: #6ba5ef;
+  --blue-200: #bcd6f7;
+
+  /* --- Tokens semánticos (tema claro) ------------------- */
+  --bg: var(--bone-100);
+  --bg-elev: #ffffff;
+  --bg-sunken: var(--bone-50);
+  --bg-inset: #f2eee6;
+
+  --border: #e4ded2;
+  --border-strong: #d4ccbc;
+
+  --text: #4b5a6e;
+  --text-strong: var(--navy-950);
+  --text-muted: #7d8a9b;
+  --text-invert: var(--bone-50);
+
+  --primary: var(--blue-700);
+  --primary-hover: var(--navy-800);
+  --primary-text: #ffffff;
+  --primary-soft: rgba(27, 79, 156, 0.08);
+  --primary-soft-hover: rgba(27, 79, 156, 0.13);
+  --primary-line: rgba(27, 79, 156, 0.22);
+
+  --success: #0f6b52;
+  --success-soft: rgba(15, 107, 82, 0.1);
+  --danger: #9d2c33;
+  --danger-soft: rgba(157, 44, 51, 0.09);
+  --warning: #8a5a10;
+  --warning-soft: rgba(138, 90, 16, 0.11);
+
+  --ring: rgba(59, 130, 224, 0.35);
+  --overlay: rgba(6, 18, 36, 0.48);
+
+  /* La barra lateral se mantiene navy en ambos temas: es la firma visual. */
+  --rail-bg: var(--navy-950);
+  --rail-line: rgba(255, 255, 255, 0.08);
+  --rail-text: rgba(233, 238, 245, 0.62);
+  --rail-text-strong: #f4f7fb;
+  --rail-active-bg: rgba(255, 255, 255, 0.09);
+
+  /* --- Forma y profundidad ------------------------------ */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(10, 27, 49, 0.06);
+  --shadow-sm: 0 1px 3px rgba(10, 27, 49, 0.07), 0 1px 2px rgba(10, 27, 49, 0.04);
+  --shadow-md: 0 6px 16px -6px rgba(10, 27, 49, 0.16), 0 2px 6px -2px rgba(10, 27, 49, 0.08);
+  --shadow-lg: 0 24px 48px -16px rgba(6, 18, 36, 0.3), 0 8px 20px -12px rgba(6, 18, 36, 0.2);
+
+  /* --- Tipografía --------------------------------------- */
+  --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --mono: 'Inter', ui-monospace, Consolas, monospace;
+
+  /* --- Métricas de layout ------------------------------- */
+  --rail-w: 244px;
+  --page-max: 1320px;
+  --ease: cubic-bezier(0.32, 0.72, 0.28, 1);
+}
+
+/* El tema oscuro aplica por preferencia del sistema, salvo que
+   el usuario haya elegido explícitamente el claro. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --bg: #070f1c;
+    --bg-elev: #0c1728;
+    --bg-sunken: #0a1422;
+    --bg-inset: #111f33;
+
+    --border: #1b2b41;
+    --border-strong: #273952;
+
+    --text: #9dabbf;
+    --text-strong: #eef3f9;
+    --text-muted: #6d7d93;
+
+    --primary: var(--blue-500);
+    --primary-hover: var(--blue-400);
+    --primary-text: #05101f;
+    --primary-soft: rgba(59, 130, 224, 0.14);
+    --primary-soft-hover: rgba(59, 130, 224, 0.2);
+    --primary-line: rgba(59, 130, 224, 0.3);
+
+    --success: #4cc79f;
+    --success-soft: rgba(76, 199, 159, 0.13);
+    --danger: #ef8a8f;
+    --danger-soft: rgba(239, 138, 143, 0.13);
+    --warning: #e0b061;
+    --warning-soft: rgba(224, 176, 97, 0.13);
+
+    --overlay: rgba(2, 7, 14, 0.66);
+    --rail-bg: #050d19;
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --shadow-md: 0 6px 16px -6px rgba(0, 0, 0, 0.6), 0 2px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 24px 48px -16px rgba(0, 0, 0, 0.7), 0 8px 20px -12px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Mismo tema oscuro, pero elegido a mano desde la app. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #070f1c;
+  --bg-elev: #0c1728;
+  --bg-sunken: #0a1422;
+  --bg-inset: #111f33;
+
+  --border: #1b2b41;
+  --border-strong: #273952;
+
+  --text: #9dabbf;
+  --text-strong: #eef3f9;
+  --text-muted: #6d7d93;
+
+  --primary: var(--blue-500);
+  --primary-hover: var(--blue-400);
+  --primary-text: #05101f;
+  --primary-soft: rgba(59, 130, 224, 0.14);
+  --primary-soft-hover: rgba(59, 130, 224, 0.2);
+  --primary-line: rgba(59, 130, 224, 0.3);
+
+  --success: #4cc79f;
+  --success-soft: rgba(76, 199, 159, 0.13);
+  --danger: #ef8a8f;
+  --danger-soft: rgba(239, 138, 143, 0.13);
+  --warning: #e0b061;
+  --warning-soft: rgba(224, 176, 97, 0.13);
+
+  --overlay: rgba(2, 7, 14, 0.66);
+  --rail-bg: #050d19;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 6px 16px -6px rgba(0, 0, 0, 0.6), 0 2px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 24px 48px -16px rgba(0, 0, 0, 0.7), 0 8px 20px -12px rgba(0, 0, 0, 0.5);
+}
