@@ -1,22 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../services/supabaseClient'
 import { useToast } from '../hooks/useToast'
-import { StatCard, EmptyState, TableSkeleton } from '../components/Ui'
+import { EmptyState, TableSkeleton } from '../components/Ui'
 import { BarRanking, StatusBar, PriceHistory } from '../components/Charts'
 import {
-  IconBox,
-  IconLayers,
-  IconCoins,
   IconAlert,
   IconCheckCircle,
   IconX,
   IconChart,
+  IconArrowDownCircle,
+  IconArrowUpCircle,
+  IconExchange,
 } from '../components/Icons'
 import {
   formatCurrency,
   formatCurrencyCompact,
   formatNumber,
   formatLocalDay,
+  formatLocalDayShort,
   toLocalDate,
 } from '../lib/format'
 
@@ -61,8 +62,7 @@ export default function Analytics() {
   const [measure, setMeasure] = useState('stock')
   const [limit, setLimit] = useState(10)
   const [order, setOrder] = useState('desc')
-  const [hideEmpty, setHideEmpty] = useState(false)
-  const [asTable, setAsTable] = useState(false)
+  const [flow, setFlow] = useState('buy') // buy | sell | both
 
   useEffect(() => {
     supabase
@@ -104,7 +104,7 @@ export default function Analytics() {
       .map((m) => ({ t: toLocalDate(m.created_at).getTime(), v: m.unit_price || 0, type: m.type }))
       .sort((a, b) => a.t - b.t)
 
-    return [
+    const all = [
       {
         id: 'buy',
         label: 'Precio de compra',
@@ -118,29 +118,29 @@ export default function Analytics() {
         points: forProduct.filter((p) => p.type === 'expense'),
       },
     ]
-  }, [movements, selectedId])
+
+    return flow === 'both' ? all : all.filter((serie) => serie.id === flow)
+  }, [movements, selectedId, flow])
 
   const ranking = useMemo(() => {
     const rows = products
-      .filter((p) => !hideEmpty || active.of(p) > 0)
+      .filter((p) => active.of(p) > 0)
       .map((p) => ({ id: p.id, label: p.name, code: p.code, value: active.of(p) }))
       .sort((a, b) => (order === 'desc' ? b.value - a.value : a.value - b.value))
 
     return limit === 0 ? rows : rows.slice(0, limit)
-  }, [products, active, order, limit, hideEmpty])
+  }, [products, active, order, limit])
 
-  const totals = useMemo(() => {
-    const units = products.reduce((sum, p) => sum + (p.stock || 0), 0)
-    const value = products.reduce((sum, p) => sum + (p.stock || 0) * (p.last_unit_price || 0), 0)
+  const levels = useMemo(() => {
     const out = products.filter((p) => !p.stock).length
     const low = products.filter((p) => p.stock > 0 && p.stock <= LOW_STOCK).length
-    return { units, value, out, low, ok: products.length - out - low }
+    return { out, low, ok: products.length - out - low }
   }, [products])
 
   const statusSegments = [
-    { id: 'out', label: 'Sin stock', value: totals.out, tone: 'critical', icon: IconX },
-    { id: 'low', label: 'Nivel bajo', value: totals.low, tone: 'warning', icon: IconAlert },
-    { id: 'ok', label: 'Normal', value: totals.ok, tone: 'good', icon: IconCheckCircle },
+    { id: 'out', label: 'Sin stock', value: levels.out, tone: 'critical', icon: IconX },
+    { id: 'low', label: 'Nivel bajo', value: levels.low, tone: 'warning', icon: IconAlert },
+    { id: 'ok', label: 'Normal', value: levels.ok, tone: 'good', icon: IconCheckCircle },
   ]
 
   return (
@@ -154,29 +154,6 @@ export default function Analytics() {
           </p>
         </div>
       </header>
-
-      <section className="stats">
-        <StatCard
-          icon={IconBox}
-          label="Productos"
-          value={formatNumber(products.length)}
-          hint="referencias registradas"
-        />
-        <StatCard
-          icon={IconLayers}
-          label="Unidades en stock"
-          value={formatNumber(totals.units)}
-          hint="suma de todas las existencias"
-          accent="var(--wine-500)"
-        />
-        <StatCard
-          icon={IconCoins}
-          label="Valor del inventario"
-          value={formatCurrencyCompact(totals.value)}
-          hint="al último precio de compra"
-          accent="var(--success)"
-        />
-      </section>
 
       {/* Controles en una sola fila, por encima de los gráficos. */}
       <div className="toolbar">
@@ -225,22 +202,6 @@ export default function Analytics() {
           </select>
         </label>
 
-        <div className="toolbar-actions">
-          <button
-            className={`btn btn-outline${hideEmpty ? ' btn-toggled' : ''}`}
-            onClick={() => setHideEmpty((v) => !v)}
-            aria-pressed={hideEmpty}
-          >
-            Ocultar ceros
-          </button>
-          <button
-            className={`btn btn-outline${asTable ? ' btn-toggled' : ''}`}
-            onClick={() => setAsTable((v) => !v)}
-            aria-pressed={asTable}
-          >
-            {asTable ? 'Ver gráfico' : 'Ver datos'}
-          </button>
-        </div>
       </div>
 
       {loading ? (
@@ -267,40 +228,11 @@ export default function Analytics() {
               </div>
             </div>
 
-            {asTable ? (
-              <div className="table-scroll">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">
-                        <span className="th-inner">Código</span>
-                      </th>
-                      <th scope="col">
-                        <span className="th-inner">Producto</span>
-                      </th>
-                      <th className="th-num" scope="col">
-                        <span className="th-inner">{active.label}</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ranking.map((r) => (
-                      <tr key={r.id}>
-                        <td className="td-code">{r.code}</td>
-                        <td className="td-strong">{r.label}</td>
-                        <td className="td-num">{active.format(r.value)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <BarRanking
-                data={ranking}
-                format={active.format}
-                emptyText="Ningún producto tiene un valor mayor a cero con esta medida."
-              />
-            )}
+            <BarRanking
+              data={ranking}
+              format={active.format}
+              emptyText="Ningún producto tiene un valor mayor a cero con esta medida."
+            />
           </section>
 
           <section className="card">
@@ -321,25 +253,60 @@ export default function Analytics() {
             <div className="card-head">
               <div className="card-title">
                 <h2>Historial de precios</h2>
-                <span className="card-count">compra y venta, por producto</span>
+                <span className="card-count">
+                  {flow === 'buy'
+                    ? 'a qué precio se compró'
+                    : flow === 'sell'
+                      ? 'a qué precio se vendió'
+                      : 'compra y venta juntas'}
+                </span>
               </div>
 
               {withHistory.length > 0 && (
-                <label className="field-inline">
-                  <span className="field-hint">Producto</span>
-                  <select
-                    className="select"
-                    value={selectedId}
-                    onChange={(e) => setHistoryId(e.target.value)}
-                    aria-label="Producto del historial de precios"
-                  >
-                    {withHistory.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.n})
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <div className="card-controls">
+                  <div className="segmented segmented-3 segmented-sm">
+                    <button
+                      type="button"
+                      className={flow === 'buy' ? 'seg-active' : ''}
+                      onClick={() => setFlow('buy')}
+                    >
+                      <IconArrowDownCircle size={14} />
+                      Compras
+                    </button>
+                    <button
+                      type="button"
+                      className={flow === 'sell' ? 'seg-active' : ''}
+                      onClick={() => setFlow('sell')}
+                    >
+                      <IconArrowUpCircle size={14} />
+                      Ventas
+                    </button>
+                    <button
+                      type="button"
+                      className={flow === 'both' ? 'seg-active' : ''}
+                      onClick={() => setFlow('both')}
+                    >
+                      <IconExchange size={14} />
+                      Ambas
+                    </button>
+                  </div>
+
+                  <label className="field-inline">
+                    <span className="field-hint">Producto</span>
+                    <select
+                      className="select"
+                      value={selectedId}
+                      onChange={(e) => setHistoryId(e.target.value)}
+                      aria-label="Producto del historial de precios"
+                    >
+                      {withHistory.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({p.n})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
               )}
             </div>
 
@@ -354,6 +321,14 @@ export default function Analytics() {
                 series={priceSeries}
                 formatValue={formatCurrencyCompact}
                 formatDate={formatLocalDay}
+                formatAxisDate={formatLocalDayShort}
+                emptyText={
+                  flow === 'buy'
+                    ? 'Este producto no tiene compras registradas.'
+                    : flow === 'sell'
+                      ? 'Este producto no tiene ventas registradas.'
+                      : 'Este producto todavía no tiene movimientos registrados.'
+                }
               />
             )}
           </section>

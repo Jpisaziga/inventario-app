@@ -281,3 +281,16 @@
 .viz-wide {
   grid-column: 1 / -1;
 }
+
+/* Controles dentro del encabezado de una tarjeta de gráfico. */
+.card-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.segmented-sm button {
+  padding: 6px 12px;
+  font-size: 12.5px;
+}

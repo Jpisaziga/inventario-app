@@ -163,7 +163,7 @@ const HEIGHT = 250
  * escala, así que van en un mismo eje: el valor está justamente en la
  * distancia entre ambas. Dos ejes inventarían una relación inexistente.
  */
-export function PriceHistory({ series, formatValue, formatDate }) {
+export function PriceHistory({ series, formatValue, formatDate, formatAxisDate, emptyText }) {
   const [wrapRef, width] = useWidth()
   const [hover, setHover] = useState(null)
 
@@ -173,7 +173,7 @@ export function PriceHistory({ series, formatValue, formatDate }) {
   if (allPoints.length === 0) {
     return (
       <div ref={wrapRef} className="viz-line">
-        <p className="viz-empty">Este producto todavía no tiene movimientos registrados.</p>
+        <p className="viz-empty">{emptyText}</p>
       </div>
     )
   }
@@ -191,6 +191,14 @@ export function PriceHistory({ series, formatValue, formatDate }) {
 
   // Cada instante con movimiento es una parada del crosshair.
   const stops = [...new Set(times)].sort((a, b) => a - b)
+
+  // Marcas de fecha repartidas a lo ancho: el eje tiene que dejar leer
+  // en qué momento ocurrió cada precio, no sólo dónde empieza y termina.
+  const tickCount = Math.min(plotW > 560 ? 5 : plotW > 340 ? 4 : 3, stops.length)
+  const dateTicks =
+    tMax === tMin
+      ? [tMin]
+      : Array.from({ length: tickCount }, (_, i) => tMin + ((tMax - tMin) * i) / (tickCount - 1))
 
   const onMove = (e) => {
     const box = e.currentTarget.getBoundingClientRect()
@@ -235,14 +243,25 @@ export function PriceHistory({ series, formatValue, formatDate }) {
             </g>
           ))}
 
-          <text x={PAD.left} y={HEIGHT - 8} className="viz-axis">
-            {formatDate(tMin)}
-          </text>
-          {tMax !== tMin && (
-            <text x={PAD.left + plotW} y={HEIGHT - 8} className="viz-axis" textAnchor="end">
-              {formatDate(tMax)}
-            </text>
-          )}
+          {dateTicks.map((t, i) => (
+            <g key={t}>
+              <line
+                x1={x(t)}
+                x2={x(t)}
+                y1={PAD.top + plotH}
+                y2={PAD.top + plotH + 5}
+                className="viz-grid-line"
+              />
+              <text
+                x={x(t)}
+                y={HEIGHT - 8}
+                className="viz-axis"
+                textAnchor={i === 0 ? 'start' : i === dateTicks.length - 1 ? 'end' : 'middle'}
+              >
+                {formatAxisDate(t)}
+              </text>
+            </g>
+          ))}
 
           {hover != null && (
             <line

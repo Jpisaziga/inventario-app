@@ -60,6 +60,17 @@ export function formatLocalDay(ms) {
   return dayFmt.format(new Date(ms))
 }
 
+const dayShortFmt = new Intl.DateTimeFormat('es-CO', {
+  day: '2-digit',
+  month: '2-digit',
+  year: '2-digit',
+})
+
+/** Versión compacta para las marcas del eje, donde el espacio es escaso. */
+export function formatLocalDayShort(ms) {
+  return dayShortFmt.format(new Date(ms))
+}
+
 export function formatDateTime(value) {
   return dateTimeFmt.format(toLocalDate(value))
 }
