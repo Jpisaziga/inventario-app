@@ -75,7 +75,9 @@ export default function Movements() {
         outValue += m.total || 0
       }
     }
-    return { inUnits, outUnits, inValue, outValue }
+    // Una entrada es una compra (sale dinero) y una salida es una venta
+    // (entra dinero), así que el balance monetario resta compras a ventas.
+    return { inUnits, outUnits, inValue, outValue, money: outValue - inValue }
   }, [filtered])
 
   const toggleSort = (field) =>
@@ -114,14 +116,14 @@ export default function Movements() {
           icon={IconArrowDownCircle}
           label="Ingresos"
           value={formatNumber(stats.inUnits)}
-          hint={`${formatCurrencyCompact(stats.inValue)} · unidades recibidas`}
+          hint={`${formatCurrencyCompact(stats.inValue)} en compras`}
           accent="var(--success)"
         />
         <StatCard
           icon={IconArrowUpCircle}
           label="Salidas"
           value={formatNumber(stats.outUnits)}
-          hint={`${formatCurrencyCompact(stats.outValue)} · unidades despachadas`}
+          hint={`${formatCurrencyCompact(stats.outValue)} en ventas`}
           accent="var(--danger)"
         />
         <StatCard
@@ -130,10 +132,16 @@ export default function Movements() {
           value={
             balance === 'units'
               ? formatNumber(stats.inUnits - stats.outUnits)
-              : formatCurrencyCompact(stats.inValue + stats.outValue)
+              : formatCurrencyCompact(stats.money)
           }
-          hint={balance === 'units' ? 'ingresos menos salidas' : 'comprado más vendido'}
-          accent="var(--wine-500)"
+          hint={balance === 'units' ? 'ingresos menos salidas' : 'ventas menos compras'}
+          accent={
+            balance === 'units'
+              ? 'var(--wine-500)'
+              : stats.money < 0
+                ? 'var(--danger)'
+                : 'var(--success)'
+          }
           action={
             <button
               className="btn-icon"

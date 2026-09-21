@@ -39,7 +39,9 @@ const currencyFmt = new Intl.NumberFormat('es-CO', {
 
 const numberFmt = new Intl.NumberFormat('es-CO')
 
-const compactFmt = new Intl.NumberFormat('es-CO', {
+const compactCurrencyFmt = new Intl.NumberFormat('es-CO', {
+  style: 'currency',
+  currency: 'COP',
   notation: 'compact',
   maximumFractionDigits: 1,
 })
@@ -55,7 +57,8 @@ export function formatCurrency(value) {
 /** Moneda abreviada ($1,2 M) para las tarjetas de métricas. */
 export function formatCurrencyCompact(value) {
   const n = Number(value) || 0
-  return n >= 1_000_000 ? '$' + compactFmt.format(n) : currencyFmt.format(n)
+  // Se compara el valor absoluto para que un negativo grande también se abrevie.
+  return Math.abs(n) >= 1_000_000 ? compactCurrencyFmt.format(n) : currencyFmt.format(n)
 }
 
 export function formatNumber(value) {
