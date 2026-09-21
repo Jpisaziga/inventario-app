@@ -185,3 +185,99 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* --- Historial de precios (líneas) ------------------------ */
+.viz {
+  /* Dos series categóricas: identidad, no magnitud ni estado.
+     Validadas en claro y oscuro (CVD ΔE 23.1 / 17.8, contraste >= 3:1). */
+  --viz-buy: #8f2c40;
+  --viz-sell: #2a78d6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) .viz {
+    --viz-buy: #c75d72;
+    --viz-sell: #3987e5;
+  }
+}
+
+:root[data-theme='dark'] .viz {
+  --viz-buy: #c75d72;
+  --viz-sell: #3987e5;
+}
+
+.viz-line {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+}
+
+.viz-line svg {
+  display: block;
+  overflow: visible;
+}
+
+.viz-grid-line {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.viz-crosshair {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.viz-axis {
+  fill: var(--text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Anillo en color de superficie: mantiene legible el punto donde se cruzan. */
+.viz-dot {
+  stroke: var(--bg-elev);
+  stroke-width: 2;
+}
+
+.viz-end-label {
+  fill: var(--text-strong);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-line-tip {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 11px;
+  border-radius: var(--r-sm);
+  background: var(--text-strong);
+  color: var(--bg-elev);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+}
+
+.viz-line-tip span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.viz-line-tip i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* La gráfica de líneas necesita el ancho completo de la rejilla. */
+.viz-wide {
+  grid-column: 1 / -1;
+}

@@ -46,6 +46,20 @@ const compactCurrencyFmt = new Intl.NumberFormat('es-CO', {
   maximumFractionDigits: 1,
 })
 
+const dayFmt = new Intl.DateTimeFormat('es-CO', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+})
+
+/**
+ * Formatea un timestamp en milisegundos que YA fue desplazado a hora
+ * local con toLocalDate. No vuelve a aplicar el desfase.
+ */
+export function formatLocalDay(ms) {
+  return dayFmt.format(new Date(ms))
+}
+
 export function formatDateTime(value) {
   return dateTimeFmt.format(toLocalDate(value))
 }

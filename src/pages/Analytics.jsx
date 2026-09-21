@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../services/supabaseClient'
 import { useToast } from '../hooks/useToast'
 import { StatCard, EmptyState, TableSkeleton } from '../components/Ui'
-import { BarRanking, StatusBar } from '../components/Charts'
+import { BarRanking, StatusBar, PriceHistory } from '../components/Charts'
 import {
   IconBox,
   IconLayers,
@@ -12,7 +12,13 @@ import {
   IconX,
   IconChart,
 } from '../components/Icons'
-import { formatCurrency, formatCurrencyCompact, formatNumber } from '../lib/format'
+import {
+  formatCurrency,
+  formatCurrencyCompact,
+  formatNumber,
+  formatLocalDay,
+  toLocalDate,
+} from '../lib/format'
 
 // Mismo umbral que usa la tabla de inventario.
 const LOW_STOCK = 5
@@ -48,7 +54,9 @@ export default function Analytics() {
   const toast = useToast()
 
   const [products, setProducts] = useState([])
+  const [movements, setMovements] = useState([])
   const [loading, setLoading] = useState(true)
+  const [historyId, setHistoryId] = useState('')
 
   const [measure, setMeasure] = useState('stock')
   const [limit, setLimit] = useState(10)
@@ -65,10 +73,52 @@ export default function Analytics() {
         setProducts(data ?? [])
         setLoading(false)
       })
+    supabase
+      .from('movements')
+      .select('product_id, product_name, type, unit_price, created_at')
+      .then(({ data }) => setMovements(data ?? []))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const active = MEASURES[measure]
+
+  // Sólo tiene sentido ofrecer productos que ya tengan historial.
+  const withHistory = useMemo(() => {
+    const counts = new Map()
+    for (const m of movements) {
+      if (!m.product_id) continue
+      const prev = counts.get(m.product_id)
+      counts.set(m.product_id, { name: m.product_name, n: (prev?.n ?? 0) + 1 })
+    }
+    return [...counts.entries()]
+      .map(([id, v]) => ({ id, name: v.name, n: v.n }))
+      .sort((a, b) => b.n - a.n)
+  }, [movements])
+
+  // Por defecto, el producto con más registros: el que más historia cuenta.
+  const selectedId = historyId || withHistory[0]?.id || ''
+
+  const priceSeries = useMemo(() => {
+    const forProduct = movements
+      .filter((m) => String(m.product_id) === String(selectedId))
+      .map((m) => ({ t: toLocalDate(m.created_at).getTime(), v: m.unit_price || 0, type: m.type }))
+      .sort((a, b) => a.t - b.t)
+
+    return [
+      {
+        id: 'buy',
+        label: 'Precio de compra',
+        color: 'var(--viz-buy)',
+        points: forProduct.filter((p) => p.type === 'income'),
+      },
+      {
+        id: 'sell',
+        label: 'Precio de venta',
+        color: 'var(--viz-sell)',
+        points: forProduct.filter((p) => p.type === 'expense'),
+      },
+    ]
+  }, [movements, selectedId])
 
   const ranking = useMemo(() => {
     const rows = products
@@ -265,6 +315,47 @@ export default function Analytics() {
               total={products.length}
               unit="productos"
             />
+          </section>
+
+          <section className="card viz-wide">
+            <div className="card-head">
+              <div className="card-title">
+                <h2>Historial de precios</h2>
+                <span className="card-count">compra y venta, por producto</span>
+              </div>
+
+              {withHistory.length > 0 && (
+                <label className="field-inline">
+                  <span className="field-hint">Producto</span>
+                  <select
+                    className="select"
+                    value={selectedId}
+                    onChange={(e) => setHistoryId(e.target.value)}
+                    aria-label="Producto del historial de precios"
+                  >
+                    {withHistory.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.n})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+            </div>
+
+            {withHistory.length === 0 ? (
+              <EmptyState
+                icon={IconChart}
+                title="Sin historial todavía"
+                text="Registrá movimientos en el inventario y acá vas a ver cómo se movió el precio de cada producto."
+              />
+            ) : (
+              <PriceHistory
+                series={priceSeries}
+                formatValue={formatCurrencyCompact}
+                formatDate={formatLocalDay}
+              />
+            )}
           </section>
         </div>
       )}
