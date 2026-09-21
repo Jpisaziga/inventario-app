@@ -8,7 +8,6 @@ import {
   IconLayers,
   IconSearch,
   IconX,
-  IconActivity,
   IconArrowDownCircle,
   IconArrowUpCircle,
 } from '../components/Icons'
@@ -22,6 +21,37 @@ import {
 } from '../lib/format'
 import { compareBy } from '../lib/sort'
 
+/**
+ * Tarjeta de flujo (ingresos o salidas). Cada una recuerda por separado
+ * si está mostrando unidades o dinero, y el icono del botón anticipa
+ * hacia qué modo cambia.
+ */
+function FlowCard({ icon, label, accent, units, money, unitsHint, moneyHint }) {
+  const [mode, setMode] = useState('units')
+  const showingUnits = mode === 'units'
+  const switchTo = showingUnits ? 'Ver el monto en dinero' : 'Ver la cantidad de unidades'
+
+  return (
+    <StatCard
+      icon={icon}
+      label={label}
+      accent={accent}
+      value={showingUnits ? formatNumber(units) : formatCurrencyCompact(money)}
+      hint={showingUnits ? unitsHint : moneyHint}
+      action={
+        <button
+          className="btn-icon"
+          onClick={() => setMode(showingUnits ? 'money' : 'units')}
+          title={switchTo}
+          aria-label={`${label}: ${switchTo.toLowerCase()}`}
+        >
+          {showingUnits ? <IconCoins size={14} /> : <IconLayers size={14} />}
+        </button>
+      }
+    />
+  )
+}
+
 export default function Movements() {
   const toast = useToast()
 
@@ -32,7 +62,6 @@ export default function Movements() {
   const [date, setDate] = useState('')
   const [type, setType] = useState('all') // all | income | expense
   const [sort, setSort] = useState({ field: 'created_at', order: 'desc' })
-  const [balance, setBalance] = useState('units') // units | money
 
   useEffect(() => {
     const load = async () => {
@@ -75,9 +104,7 @@ export default function Movements() {
         outValue += m.total || 0
       }
     }
-    // Una entrada es una compra (sale dinero) y una salida es una venta
-    // (entra dinero), así que el balance monetario resta compras a ventas.
-    return { inUnits, outUnits, inValue, outValue, money: outValue - inValue }
+    return { inUnits, outUnits, inValue, outValue }
   }, [filtered])
 
   const toggleSort = (field) =>
@@ -105,55 +132,24 @@ export default function Movements() {
         </div>
       </header>
 
-      <section className="stats">
-        <StatCard
-          icon={IconActivity}
-          label="Movimientos"
-          value={formatNumber(filtered.length)}
-          hint={hasFilters ? 'según los filtros activos' : 'registrados en total'}
-        />
-        <StatCard
+      <section className="stats stats-pair">
+        <FlowCard
           icon={IconArrowDownCircle}
           label="Ingresos"
-          value={formatNumber(stats.inUnits)}
-          hint={`${formatCurrencyCompact(stats.inValue)} en compras`}
           accent="var(--success)"
+          units={stats.inUnits}
+          money={stats.inValue}
+          unitsHint="unidades compradas"
+          moneyHint="gastado en compras"
         />
-        <StatCard
+        <FlowCard
           icon={IconArrowUpCircle}
           label="Salidas"
-          value={formatNumber(stats.outUnits)}
-          hint={`${formatCurrencyCompact(stats.outValue)} en ventas`}
           accent="var(--danger)"
-        />
-        <StatCard
-          icon={balance === 'units' ? IconLayers : IconCoins}
-          label={balance === 'units' ? 'Balance de unidades' : 'Balance de dinero'}
-          value={
-            balance === 'units'
-              ? formatNumber(stats.inUnits - stats.outUnits)
-              : formatCurrencyCompact(stats.money)
-          }
-          hint={balance === 'units' ? 'ingresos menos salidas' : 'ventas menos compras'}
-          accent={
-            balance === 'units'
-              ? 'var(--wine-500)'
-              : stats.money < 0
-                ? 'var(--danger)'
-                : 'var(--success)'
-          }
-          action={
-            <button
-              className="btn-icon"
-              onClick={() => setBalance((b) => (b === 'units' ? 'money' : 'units'))}
-              title={balance === 'units' ? 'Ver balance de dinero' : 'Ver balance de unidades'}
-              aria-label={
-                balance === 'units' ? 'Ver balance de dinero' : 'Ver balance de unidades'
-              }
-            >
-              <IconExchange size={14} />
-            </button>
-          }
+          units={stats.outUnits}
+          money={stats.outValue}
+          unitsHint="unidades vendidas"
+          moneyHint="recibido en ventas"
         />
       </section>
 

@@ -39,9 +39,13 @@
   gap: 14px;
 }
 
-/* Una sola métrica no debe estirarse a lo ancho de la página. */
+/* Pocas métricas no deben estirarse a lo ancho de la página. */
 .stats-single {
   grid-template-columns: minmax(200px, 340px);
+}
+
+.stats-pair {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
 }
 
 .stat {
