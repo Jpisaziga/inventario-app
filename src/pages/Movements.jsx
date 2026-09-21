@@ -62,6 +62,7 @@ export default function Movements() {
   const [date, setDate] = useState('')
   const [type, setType] = useState('all') // all | income | expense
   const [sort, setSort] = useState({ field: 'created_at', order: 'desc' })
+  const [balance, setBalance] = useState('units') // units | money
 
   useEffect(() => {
     const load = async () => {
@@ -104,7 +105,9 @@ export default function Movements() {
         outValue += m.total || 0
       }
     }
-    return { inUnits, outUnits, inValue, outValue }
+    // Una entrada es una compra (sale dinero) y una salida es una venta
+    // (entra dinero), así que el balance monetario resta compras a ventas.
+    return { inUnits, outUnits, inValue, outValue, money: outValue - inValue }
   }, [filtered])
 
   const toggleSort = (field) =>
@@ -132,7 +135,7 @@ export default function Movements() {
         </div>
       </header>
 
-      <section className="stats stats-pair">
+      <section className="stats stats-compact">
         <FlowCard
           icon={IconArrowDownCircle}
           label="Ingresos"
@@ -150,6 +153,35 @@ export default function Movements() {
           money={stats.outValue}
           unitsHint="unidades vendidas"
           moneyHint="recibido en ventas"
+        />
+        <StatCard
+          icon={balance === 'units' ? IconLayers : IconCoins}
+          label={balance === 'units' ? 'Balance de unidades' : 'Balance de dinero'}
+          value={
+            balance === 'units'
+              ? formatNumber(stats.inUnits - stats.outUnits)
+              : formatCurrencyCompact(stats.money)
+          }
+          hint={balance === 'units' ? 'ingresos menos salidas' : 'ventas menos compras'}
+          accent={
+            balance === 'units'
+              ? 'var(--wine-500)'
+              : stats.money < 0
+                ? 'var(--danger)'
+                : 'var(--success)'
+          }
+          action={
+            <button
+              className="btn-icon"
+              onClick={() => setBalance((b) => (b === 'units' ? 'money' : 'units'))}
+              title={balance === 'units' ? 'Ver balance de dinero' : 'Ver balance de unidades'}
+              aria-label={
+                balance === 'units' ? 'Ver balance de dinero' : 'Ver balance de unidades'
+              }
+            >
+              <IconExchange size={14} />
+            </button>
+          }
         />
       </section>
 

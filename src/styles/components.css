@@ -44,7 +44,7 @@
   grid-template-columns: minmax(200px, 340px);
 }
 
-.stats-pair {
+.stats-compact {
   grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
 }
 
