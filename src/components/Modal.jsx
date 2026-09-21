@@ -2,28 +2,45 @@ import { useEffect, useRef } from 'react'
 import { IconX, IconAlert } from './Icons'
 
 /**
+ * Mantiene el último onClose en una ref para que los listeners se registren
+ * una sola vez: si dependieran de la prop, se volverían a montar en cada
+ * render del padre y robarían el foco mientras se escribe.
+ */
+function useLatest(value) {
+  const ref = useRef(value)
+  useEffect(() => {
+    ref.current = value
+  }, [value])
+  return ref
+}
+
+/**
  * Diálogo modal: cierra con Esc o clic en el fondo, bloquea el scroll
- * de la página y deja el foco en el primer control al abrirse.
+ * de la página y deja el foco en el primer campo al abrirse.
  */
 export default function Modal({ title, description, onClose, footer, children }) {
   const bodyRef = useRef(null)
+  const closeRef = useLatest(onClose)
 
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') closeRef.current()
     }
     document.addEventListener('keydown', onKey)
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
-    bodyRef.current?.querySelector('input, select, textarea, button')?.focus()
+    // Sólo campos de entrada: enfocar un botón cambiaría la selección.
+    bodyRef.current?.querySelector('input, select, textarea')?.focus()
 
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = previousOverflow
     }
-  }, [onClose])
+    // Se ejecuta una única vez, al montar el modal.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="overlay" onMouseDown={onClose}>
@@ -56,13 +73,16 @@ export default function Modal({ title, description, onClose, footer, children })
 
 /** Confirmación destructiva, con el mismo lenguaje visual que Modal. */
 export function ConfirmModal({ title, description, confirmLabel, onConfirm, onClose }) {
+  const closeRef = useLatest(onClose)
+
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') closeRef.current()
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="overlay" onMouseDown={onClose}>
