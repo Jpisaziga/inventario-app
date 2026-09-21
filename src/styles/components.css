@@ -332,6 +332,16 @@
   padding-right: 32px;
 }
 
+/* El campo es type="search" y Chrome/Safari dibujan su propia ✕, que
+   duplicaría el botón de limpieza de la app. Firefox no dibuja ninguna,
+   así que el botón propio es el que garantiza el control en todos. */
+.search .input::-webkit-search-cancel-button,
+.search .input::-webkit-search-decoration {
+  appearance: none;
+  -webkit-appearance: none;
+  display: none;
+}
+
 .search-clear {
   position: absolute;
   right: 5px;
