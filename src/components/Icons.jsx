@@ -157,3 +157,9 @@ export const IconMoon = (p) => (
     <path d="M21 13A9 9 0 0 1 11 3a9 9 0 1 0 10 10Z" />
   </Svg>
 )
+
+export const IconChevronLeft = (p) => (
+  <Svg {...p}>
+    <path d="m14.5 5-7 7 7 7" />
+  </Svg>
+)

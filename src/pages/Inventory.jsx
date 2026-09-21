@@ -202,15 +202,17 @@ export default function Inventory() {
         </div>
       </header>
 
-      <section className="stats stats-single">
-        <StatCard
-          icon={IconAlert}
-          label="Requieren atención"
-          value={formatNumber(alerts.total)}
-          hint={`${alerts.out} sin stock · ${alerts.low} en nivel bajo`}
-          accent={alerts.total ? 'var(--warning)' : 'var(--text-muted)'}
-        />
-      </section>
+      {alerts.total > 0 && (
+        <section className="stats stats-single">
+          <StatCard
+            icon={IconAlert}
+            label="Requieren atención"
+            value={formatNumber(alerts.total)}
+            hint={`${alerts.out} sin stock · ${alerts.low} en nivel bajo`}
+            accent="var(--warning)"
+          />
+        </section>
+      )}
 
       <div className="toolbar">
         <SearchField

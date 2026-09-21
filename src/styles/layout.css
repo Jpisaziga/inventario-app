@@ -6,6 +6,13 @@
   display: grid;
   grid-template-columns: var(--rail-w) minmax(0, 1fr);
   min-height: 100svh;
+  transition: grid-template-columns 0.24s var(--ease);
+}
+
+/* Rail retraído: sólo iconos, para dejarle el ancho a las tablas. */
+.shell-collapsed {
+  --rail-w: 74px;
+  --rail-pad: 14px;
 }
 
 /* --- Rail lateral --------------------------------------- */
@@ -17,7 +24,7 @@
   display: flex;
   flex-direction: column;
   gap: 28px;
-  padding: 26px 18px 20px;
+  padding: 26px var(--rail-pad) 20px;
   background: var(--rail-bg);
   border-right: 1px solid var(--rail-line);
 }
@@ -36,9 +43,9 @@
   height: 36px;
   flex: none;
   border-radius: var(--r-md);
-  background: linear-gradient(150deg, var(--blue-500), var(--blue-700));
+  background: linear-gradient(150deg, var(--wine-500), var(--wine-900));
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .rail-brand-text {
@@ -75,7 +82,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(233, 238, 245, 0.38);
+  color: rgba(248, 236, 239, 0.38);
 }
 
 .rail-link {
@@ -95,7 +102,7 @@
 }
 
 .rail-link:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--rail-text-strong);
 }
 
@@ -108,13 +115,13 @@
 .rail-link-active::before {
   content: '';
   position: absolute;
-  left: -18px;
+  left: calc(var(--rail-pad) * -1);
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
   height: 20px;
   border-radius: 0 var(--r-pill) var(--r-pill) 0;
-  background: var(--blue-400);
+  background: var(--wine-300);
 }
 
 .rail-link svg {
@@ -131,11 +138,50 @@
   border-top: 1px solid var(--rail-line);
 }
 
+.rail-foot-actions {
+  display: flex;
+  gap: 4px;
+}
+
 .rail-note {
   padding: 0 10px;
   font-size: 11.5px;
   line-height: 1.5;
-  color: rgba(233, 238, 245, 0.4);
+  color: rgba(248, 236, 239, 0.4);
+}
+
+/* --- Rail retraído --------------------------------------- */
+.rail-collapsed {
+  gap: 22px;
+}
+
+.rail-collapsed .rail-brand {
+  justify-content: center;
+  padding: 0;
+}
+
+.rail-collapsed .rail-brand-text,
+.rail-collapsed .rail-label,
+.rail-collapsed .rail-note {
+  display: none;
+}
+
+.rail-collapsed .rail-link {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.rail-collapsed .rail-link span {
+  display: none;
+}
+
+.rail-collapsed .rail-foot-actions {
+  flex-direction: column;
+  align-items: center;
+}
+
+.rail-collapse-btn svg {
+  transition: transform 0.24s var(--ease);
 }
 
 /* --- Área de página ------------------------------------- */
@@ -179,11 +225,13 @@
 
 /* --- Responsive: el rail pasa a barra superior ---------- */
 @media (max-width: 900px) {
-  .shell {
+  .shell,
+  .shell-collapsed {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .rail {
+  .rail,
+  .rail-collapsed {
     position: sticky;
     top: 0;
     z-index: 40;
@@ -196,16 +244,29 @@
     border-bottom: 1px solid var(--rail-line);
   }
 
+  .rail-collapsed .rail-brand {
+    padding: 0 8px;
+  }
+
   .rail-brand-sub,
   .rail-label,
   .rail-note {
     display: none;
   }
 
-  .rail-nav {
+  .rail-nav,
+  .rail-collapsed .rail-nav {
     flex-direction: row;
     gap: 6px;
     margin-left: auto;
+  }
+
+  .rail-collapsed .rail-link {
+    padding: 9px 11px;
+  }
+
+  .rail-collapsed .rail-link span {
+    display: inline;
   }
 
   .rail-link-active::before {
@@ -219,10 +280,21 @@
     border-radius: var(--r-pill);
   }
 
-  .rail-foot {
+  .rail-foot,
+  .rail-collapsed .rail-foot {
     margin-top: 0;
     padding-top: 0;
     border-top: none;
+  }
+
+  .rail-foot-actions,
+  .rail-collapsed .rail-foot-actions {
+    flex-direction: row;
+  }
+
+  /* Con el rail ya convertido en barra, retraerlo no aporta nada. */
+  .rail-collapse-btn {
+    display: none;
   }
 
   .page {
@@ -231,15 +303,18 @@
 }
 
 @media (max-width: 560px) {
-  .rail {
+  .rail,
+  .rail-collapsed {
     padding: 10px 16px;
   }
 
-  .rail-link span {
+  .rail-link span,
+  .rail-collapsed .rail-link span {
     display: none;
   }
 
-  .rail-link {
+  .rail-link,
+  .rail-collapsed .rail-link {
     padding: 9px 12px;
   }
 

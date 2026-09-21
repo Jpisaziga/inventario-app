@@ -133,7 +133,7 @@ export default function Movements() {
               : formatCurrencyCompact(stats.inValue + stats.outValue)
           }
           hint={balance === 'units' ? 'ingresos menos salidas' : 'comprado más vendido'}
-          accent="var(--blue-500)"
+          accent="var(--wine-500)"
           action={
             <button
               className="btn-icon"
