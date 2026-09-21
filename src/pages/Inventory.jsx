@@ -11,14 +11,12 @@ import {
   IconX,
   IconExchange,
   IconBox,
-  IconLayers,
-  IconCoins,
   IconAlert,
   IconArrowDownCircle,
   IconArrowUpCircle,
   IconSearch,
 } from '../components/Icons'
-import { formatCurrency, formatCurrencyCompact, formatNumber } from '../lib/format'
+import { formatCurrency, formatNumber } from '../lib/format'
 import { compareBy } from '../lib/sort'
 
 // Umbral a partir del cual una existencia se marca como "bajo".
@@ -72,12 +70,10 @@ export default function Inventory() {
       .sort(compareBy(sort.field, sort.order))
   }, [products, search, sort])
 
-  const stats = useMemo(() => {
-    const units = products.reduce((sum, p) => sum + (p.stock || 0), 0)
-    const value = products.reduce((sum, p) => sum + (p.stock || 0) * (p.last_unit_price || 0), 0)
+  const alerts = useMemo(() => {
     const out = products.filter((p) => !p.stock).length
     const low = products.filter((p) => p.stock > 0 && p.stock <= LOW_STOCK).length
-    return { units, value, out, low }
+    return { out, low, total: out + low }
   }, [products])
 
   const toggleSort = (field) =>
@@ -206,33 +202,13 @@ export default function Inventory() {
         </div>
       </header>
 
-      <section className="stats">
-        <StatCard
-          icon={IconBox}
-          label="Productos"
-          value={formatNumber(products.length)}
-          hint="referencias registradas"
-        />
-        <StatCard
-          icon={IconLayers}
-          label="Unidades en stock"
-          value={formatNumber(stats.units)}
-          hint="suma de todas las existencias"
-          accent="var(--blue-500)"
-        />
-        <StatCard
-          icon={IconCoins}
-          label="Valor del inventario"
-          value={formatCurrencyCompact(stats.value)}
-          hint="al último precio de compra"
-          accent="var(--success)"
-        />
+      <section className="stats stats-single">
         <StatCard
           icon={IconAlert}
           label="Requieren atención"
-          value={formatNumber(stats.out + stats.low)}
-          hint={`${stats.out} sin stock · ${stats.low} en nivel bajo`}
-          accent={stats.out + stats.low ? 'var(--warning)' : 'var(--text-muted)'}
+          value={formatNumber(alerts.total)}
+          hint={`${alerts.out} sin stock · ${alerts.low} en nivel bajo`}
+          accent={alerts.total ? 'var(--warning)' : 'var(--text-muted)'}
         />
       </section>
 

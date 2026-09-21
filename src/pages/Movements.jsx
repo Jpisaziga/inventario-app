@@ -4,6 +4,8 @@ import { useToast } from '../hooks/useToast'
 import { StatCard, SearchField, Th, EmptyState, TableSkeleton } from '../components/Ui'
 import {
   IconExchange,
+  IconCoins,
+  IconLayers,
   IconSearch,
   IconX,
   IconActivity,
@@ -30,6 +32,7 @@ export default function Movements() {
   const [date, setDate] = useState('')
   const [type, setType] = useState('all') // all | income | expense
   const [sort, setSort] = useState({ field: 'created_at', order: 'desc' })
+  const [balance, setBalance] = useState('units') // units | money
 
   useEffect(() => {
     const load = async () => {
@@ -122,11 +125,27 @@ export default function Movements() {
           accent="var(--danger)"
         />
         <StatCard
-          icon={IconExchange}
-          label="Balance de unidades"
-          value={formatNumber(stats.inUnits - stats.outUnits)}
-          hint="ingresos menos salidas"
+          icon={balance === 'units' ? IconLayers : IconCoins}
+          label={balance === 'units' ? 'Balance de unidades' : 'Balance de dinero'}
+          value={
+            balance === 'units'
+              ? formatNumber(stats.inUnits - stats.outUnits)
+              : formatCurrencyCompact(stats.inValue + stats.outValue)
+          }
+          hint={balance === 'units' ? 'ingresos menos salidas' : 'comprado más vendido'}
           accent="var(--blue-500)"
+          action={
+            <button
+              className="btn-icon"
+              onClick={() => setBalance((b) => (b === 'units' ? 'money' : 'units'))}
+              title={balance === 'units' ? 'Ver balance de dinero' : 'Ver balance de unidades'}
+              aria-label={
+                balance === 'units' ? 'Ver balance de dinero' : 'Ver balance de unidades'
+              }
+            >
+              <IconExchange size={14} />
+            </button>
+          }
         />
       </section>
 

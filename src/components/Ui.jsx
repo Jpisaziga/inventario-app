@@ -1,7 +1,10 @@
 import { IconSearch, IconX, IconArrowUp, IconInbox } from './Icons'
 
-/** Tarjeta de métrica. `accent` es un color CSS que tiñe filo e icono. */
-export function StatCard({ icon: Icon, label, value, hint, accent }) {
+/**
+ * Tarjeta de métrica. `accent` es un color CSS que tiñe filo e icono;
+ * `action` es un control opcional alineado a la derecha del encabezado.
+ */
+export function StatCard({ icon: Icon, label, value, hint, accent, action }) {
   return (
     <div className="stat" style={accent ? { '--stat-accent': accent } : undefined}>
       <div className="stat-top">
@@ -11,6 +14,7 @@ export function StatCard({ icon: Icon, label, value, hint, accent }) {
           </span>
         )}
         <span className="stat-label">{label}</span>
+        {action && <span className="stat-action">{action}</span>}
       </div>
       <div className="stat-value">{value}</div>
       {hint && <div className="stat-hint">{hint}</div>}

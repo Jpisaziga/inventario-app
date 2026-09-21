@@ -39,6 +39,11 @@
   gap: 14px;
 }
 
+/* Una sola métrica no debe estirarse a lo ancho de la página. */
+.stats-single {
+  grid-template-columns: minmax(200px, 340px);
+}
+
 .stat {
   position: relative;
   overflow: hidden;
@@ -81,6 +86,11 @@
   border-radius: var(--r-sm);
   background: color-mix(in srgb, var(--stat-accent, var(--primary)) 11%, transparent);
   color: var(--stat-accent, var(--primary));
+}
+
+.stat-action {
+  margin-left: auto;
+  display: flex;
 }
 
 .stat-label {
