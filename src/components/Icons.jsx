@@ -163,3 +163,20 @@ export const IconChevronLeft = (p) => (
     <path d="m14.5 5-7 7 7 7" />
   </Svg>
 )
+
+export const IconChart = (p) => (
+  <Svg {...p}>
+    <path d="M4 20V4" />
+    <path d="M4 20h16" />
+    <rect x="7.5" y="12" width="3.5" height="5" rx="1" />
+    <rect x="14" y="7" width="3.5" height="10" rx="1" />
+  </Svg>
+)
+
+export const IconNote = (p) => (
+  <Svg {...p}>
+    <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z" />
+    <path d="M14 3v6h6" />
+    <path d="M8.5 13.5h7M8.5 17h4" />
+  </Svg>
+)

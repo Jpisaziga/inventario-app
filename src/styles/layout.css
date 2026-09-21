@@ -73,6 +73,12 @@
 .rail-nav {
   display: flex;
   flex-direction: column;
+  gap: 18px;
+}
+
+.rail-group {
+  display: flex;
+  flex-direction: column;
   gap: 3px;
 }
 
@@ -175,6 +181,10 @@
   display: none;
 }
 
+.rail-collapsed .rail-nav {
+  gap: 10px;
+}
+
 .rail-collapsed .rail-foot-actions {
   flex-direction: column;
   align-items: center;
@@ -259,6 +269,11 @@
     flex-direction: row;
     gap: 6px;
     margin-left: auto;
+  }
+
+  .rail-group {
+    flex-direction: row;
+    gap: 6px;
   }
 
   .rail-collapsed .rail-link {

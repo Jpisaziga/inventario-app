@@ -1,0 +1,187 @@
+/* ============================================================
+   Gráficos
+   Los colores de marca están validados con el verificador de la
+   guía de visualización: contraste >= 3:1 contra cada superficie y
+   separación bajo daltonismo en los segmentos de estado.
+   ============================================================ */
+
+.viz {
+  /* Serie única de las barras: un solo tono, nunca una rampa por valor. */
+  --viz-bar: #8f2c40; /* 8.07:1 sobre blanco */
+
+  /* Paleta de estado reservada: igual en ambos temas, siempre con icono. */
+  --viz-critical: #d03b3b;
+  --viz-warning: #fab219;
+  --viz-good: #0ca30c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) .viz {
+    --viz-bar: #de8a9b; /* 5.66:1 sobre la superficie oscura */
+  }
+}
+
+:root[data-theme='dark'] .viz {
+  --viz-bar: #de8a9b;
+}
+
+/* --- Ranking en barras ---------------------------------- */
+.viz-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 18px;
+}
+
+.viz-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 150px) minmax(0, 1fr) minmax(64px, auto);
+  align-items: center;
+  gap: 12px;
+  /* El área sensible es toda la fila, más grande que la barra. */
+  padding: 2px 0;
+  border-radius: var(--r-sm);
+  transition: background 0.13s var(--ease);
+}
+
+.viz-row:hover {
+  background: var(--primary-soft);
+}
+
+.viz-row-label {
+  font-size: 13px;
+  color: var(--text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viz-track {
+  display: block;
+  height: 20px;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--bg-inset);
+}
+
+.viz-bar {
+  display: block;
+  height: 100%;
+  /* Extremo del dato redondeado, base cuadrada sobre el eje. */
+  border-radius: 0 4px 4px 0;
+  background: var(--viz-bar);
+  transition: width 0.3s var(--ease);
+}
+
+.viz-row-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-strong);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* --- Barra de estado ------------------------------------- */
+.viz-status {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+}
+
+.viz-stack {
+  display: flex;
+  /* Separador en color de superficie: nunca un borde sobre la marca. */
+  gap: 2px;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.viz-seg {
+  display: grid;
+  place-items: center;
+  min-width: 3px;
+  transition: width 0.3s var(--ease), filter 0.15s var(--ease);
+}
+
+.viz-seg:hover {
+  filter: brightness(1.08);
+}
+
+/* Única excepción a "el texto no lleva el color del dato": va dentro
+   del relleno, así que toma tinta oscura, que contrasta con los tres. */
+.viz-seg-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: rgba(23, 10, 12, 0.82);
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.viz-legend li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.viz-key {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 3px;
+}
+
+.viz-legend-label {
+  color: var(--text);
+}
+
+.viz-legend-value {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+/* --- Tooltip --------------------------------------------- */
+.viz-tip {
+  position: fixed;
+  z-index: 90;
+  transform: translate(-50%, calc(-100% - 8px));
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  background: var(--text-strong);
+  color: var(--bg-elev);
+  font-size: 12.5px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+}
+
+.viz-empty {
+  padding: 40px 18px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+/* --- Rejilla de la página de análisis --------------------- */
+.viz-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .viz-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

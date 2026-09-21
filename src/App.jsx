@@ -1,20 +1,38 @@
 import { useState } from 'react'
 import Inventory from './pages/Inventory'
 import Movements from './pages/Movements'
+import Analytics from './pages/Analytics'
+import Notes from './pages/Notes'
 import { useTheme } from './hooks/useTheme'
 import { useStoredState } from './hooks/useStoredState'
 import {
   IconBox,
   IconExchange,
+  IconChart,
+  IconNote,
   IconSun,
   IconMoon,
   IconChevronLeft,
 } from './components/Icons'
 
-const PAGES = [
-  { id: 'inventory', label: 'Inventario', icon: IconBox, Component: Inventory },
-  { id: 'movements', label: 'Movimientos', icon: IconExchange, Component: Movements },
+const GROUPS = [
+  {
+    label: 'Gestión',
+    pages: [
+      { id: 'inventory', label: 'Inventario', icon: IconBox, Component: Inventory },
+      { id: 'movements', label: 'Movimientos', icon: IconExchange, Component: Movements },
+    ],
+  },
+  {
+    label: 'Planeación',
+    pages: [
+      { id: 'analytics', label: 'Reportes', icon: IconChart, Component: Analytics },
+      { id: 'notes', label: 'Notas', icon: IconNote, Component: Notes },
+    ],
+  },
 ]
+
+const ALL_PAGES = GROUPS.flatMap((g) => g.pages)
 
 export default function App() {
   const [pageId, setPageId] = useState('inventory')
@@ -25,7 +43,7 @@ export default function App() {
     (raw) => raw === 'true',
   )
 
-  const current = PAGES.find((p) => p.id === pageId) ?? PAGES[0]
+  const current = ALL_PAGES.find((p) => p.id === pageId) ?? ALL_PAGES[0]
   const Page = current.Component
 
   return (
@@ -42,22 +60,26 @@ export default function App() {
         </div>
 
         <nav className="rail-nav" aria-label="Secciones">
-          <span className="rail-label">Gestión</span>
-          {PAGES.map((item) => {
-            const Icon = item.icon
-            return (
-              <button
-                key={item.id}
-                className={`rail-link${item.id === pageId ? ' rail-link-active' : ''}`}
-                onClick={() => setPageId(item.id)}
-                aria-current={item.id === pageId ? 'page' : undefined}
-                title={collapsed ? item.label : undefined}
-              >
-                <Icon size={17} />
-                <span>{item.label}</span>
-              </button>
-            )
-          })}
+          {GROUPS.map((group) => (
+            <div className="rail-group" key={group.label}>
+              <span className="rail-label">{group.label}</span>
+              {group.pages.map((item) => {
+                const Icon = item.icon
+                return (
+                  <button
+                    key={item.id}
+                    className={`rail-link${item.id === pageId ? ' rail-link-active' : ''}`}
+                    onClick={() => setPageId(item.id)}
+                    aria-current={item.id === pageId ? 'page' : undefined}
+                    title={collapsed ? item.label : undefined}
+                  >
+                    <Icon size={17} />
+                    <span>{item.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="rail-foot">
