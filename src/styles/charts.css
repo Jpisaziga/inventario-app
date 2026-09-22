@@ -294,3 +294,15 @@
   padding: 6px 12px;
   font-size: 12.5px;
 }
+
+/* Separación entre días en el modo por movimiento. */
+.viz-day-edge {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.viz-tip-sub {
+  opacity: 0.72;
+  font-size: 11.5px;
+}

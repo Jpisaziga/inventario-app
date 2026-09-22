@@ -19,6 +19,7 @@ import {
   formatLocalDay,
   formatLocalDayShort,
   toLocalDate,
+  toDayKey,
 } from '../lib/format'
 
 // Mismo umbral que usa la tabla de inventario.
@@ -51,6 +52,9 @@ const MEASURES = {
 
 const LIMITS = [5, 10, 15, 25, 0]
 
+/** Día de un timestamp ya desplazado a hora local, para agrupar movimientos. */
+const dayKeyOf = (ms) => toDayKey(new Date(ms))
+
 export default function Analytics() {
   const toast = useToast()
 
@@ -63,6 +67,7 @@ export default function Analytics() {
   const [limit, setLimit] = useState(10)
   const [order, setOrder] = useState('desc')
   const [flow, setFlow] = useState('buy') // buy | sell | both
+  const [axis, setAxis] = useState('seq') // seq | time
 
   useEffect(() => {
     supabase
@@ -75,7 +80,7 @@ export default function Analytics() {
       })
     supabase
       .from('movements')
-      .select('product_id, product_name, type, unit_price, created_at')
+      .select('id, product_id, product_name, type, quantity, unit_price, created_at')
       .then(({ data }) => setMovements(data ?? []))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -101,7 +106,13 @@ export default function Analytics() {
   const priceSeries = useMemo(() => {
     const forProduct = movements
       .filter((m) => String(m.product_id) === String(selectedId))
-      .map((m) => ({ t: toLocalDate(m.created_at).getTime(), v: m.unit_price || 0, type: m.type }))
+      .map((m) => ({
+        id: m.id,
+        t: toLocalDate(m.created_at).getTime(),
+        v: m.unit_price || 0,
+        qty: m.quantity,
+        type: m.type,
+      }))
       .sort((a, b) => a.t - b.t)
 
     const all = [
@@ -292,6 +303,19 @@ export default function Analytics() {
                   </div>
 
                   <label className="field-inline">
+                    <span className="field-hint">Eje</span>
+                    <select
+                      className="select"
+                      value={axis}
+                      onChange={(e) => setAxis(e.target.value)}
+                      aria-label="Modo del eje horizontal"
+                    >
+                      <option value="seq">Por movimiento</option>
+                      <option value="time">Por fecha real</option>
+                    </select>
+                  </label>
+
+                  <label className="field-inline">
                     <span className="field-hint">Producto</span>
                     <select
                       className="select"
@@ -319,6 +343,8 @@ export default function Analytics() {
             ) : (
               <PriceHistory
                 series={priceSeries}
+                mode={axis}
+                dayKeyOf={dayKeyOf}
                 formatValue={formatCurrencyCompact}
                 formatDate={formatLocalDay}
                 formatAxisDate={formatLocalDayShort}
